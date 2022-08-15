@@ -1,8 +1,45 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using LIVLens.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+
+string domain = $"https://{builder.Configuration["Auth0:Domain"]}/";
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = domain;
+        options.Audience = builder.Configuration["Auth0:Audience"];
+        // If the access token does not have a `sub` claim, `User.Identity.Name` will be `null`. Map it to a different claim by setting the NameClaimType below.
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            NameClaimType = ClaimTypes.NameIdentifier
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("write:admin", policy => policy.Requirements.Add(new HasScopeRequirement("write:admin", domain)));
+});
+
+builder.Services.AddSwaggerDocument(settings =>
+{
+    settings.PostProcess = document =>
+    {
+        document.Info.Version = "v1";
+        document.Info.Title = "LIVLens API";
+        document.Info.Description = "REST API for LIV Golf data collection & analytics.";
+    };
+});
+
+builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 
 var app = builder.Build();
 
@@ -16,6 +53,12 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseOpenApi();
+app.UseSwaggerUi3();
 
 
 app.MapControllerRoute(

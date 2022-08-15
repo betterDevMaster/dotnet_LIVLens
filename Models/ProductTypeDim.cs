@@ -14,7 +14,9 @@ namespace LIVLens.Models
         public string ProductCategory { get; set; } = null!;
         public string? ProductSubCategory { get; set; }
         public string ProductType { get; set; } = null!;
+        public string? InternalAttrCategory { get; set; }
         public DateTime AddDate { get; set; }
+        public DateTime? DeleteDate { get; set; }
         public DateTime UpdateDate { get; set; }
 
         public virtual ICollection<SurveyFact> SurveyFacts { get; set; }

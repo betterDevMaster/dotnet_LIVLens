@@ -11,9 +11,10 @@
     "LIVLens": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:61648",
+      "applicationUrl": "https://localhost:7190;http://localhost:5248",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"
       }
     },
     "IIS Express": {

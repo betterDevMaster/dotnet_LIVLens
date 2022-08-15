@@ -21,7 +21,9 @@ namespace LIVLens.Models
         public virtual DbSet<ClubDim> ClubDims { get; set; } = null!;
         public virtual DbSet<ClubDimRaw> ClubDimRaws { get; set; } = null!;
         public virtual DbSet<EventDim> EventDims { get; set; } = null!;
+        public virtual DbSet<EventHoleDim> EventHoleDims { get; set; } = null!;
         public virtual DbSet<EventPlayerDim> EventPlayerDims { get; set; } = null!;
+        public virtual DbSet<EventPlayerScoreFact> EventPlayerScoreFacts { get; set; } = null!;
         public virtual DbSet<PlayerDim> PlayerDims { get; set; } = null!;
         public virtual DbSet<ProductTypeDim> ProductTypeDims { get; set; } = null!;
         public virtual DbSet<SurveyFact> SurveyFacts { get; set; } = null!;
@@ -58,6 +60,10 @@ namespace LIVLens.Models
                     .HasMaxLength(45)
                     .HasColumnName("BRAND");
 
+                entity.Property(e => e.DeleteDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("DELETE_DATE");
+
                 entity.Property(e => e.UpdateDate)
                     .HasColumnType("datetime")
                     .ValueGeneratedOnAddOrUpdate()
@@ -82,6 +88,16 @@ namespace LIVLens.Models
                 entity.Property(e => e.Brand)
                     .HasMaxLength(64)
                     .HasColumnName("BRAND");
+
+                entity.Property(e => e.BrandId).HasColumnName("BRAND_ID");
+
+                entity.Property(e => e.DeleteDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("DELETE_DATE");
+
+                entity.Property(e => e.InternalAttrCategory)
+                    .HasMaxLength(45)
+                    .HasColumnName("INTERNAL_ATTR_CATEGORY");
 
                 entity.Property(e => e.Model)
                     .HasMaxLength(64)
@@ -170,6 +186,8 @@ namespace LIVLens.Models
                     .HasMaxLength(45)
                     .HasColumnName("COURSE_NAME");
 
+                entity.Property(e => e.CoursePar).HasColumnName("COURSE_PAR");
+
                 entity.Property(e => e.EventDate)
                     .HasColumnType("datetime")
                     .HasColumnName("EVENT_DATE");
@@ -187,6 +205,44 @@ namespace LIVLens.Models
                     .ValueGeneratedOnAddOrUpdate()
                     .HasColumnName("UPDATE_DATE")
                     .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            modelBuilder.Entity<EventHoleDim>(entity =>
+            {
+                entity.HasKey(e => e.EventHoleId)
+                    .HasName("PRIMARY");
+
+                entity.ToTable("EVENT_HOLE_DIM");
+
+                entity.HasIndex(e => new { e.EventId, e.HoleNum }, "EVENT_HOLE")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.EventId, "FK_EVENT_HOLE_EVENT_ID_idx");
+
+                entity.Property(e => e.EventHoleId).HasColumnName("EVENT_HOLE_ID");
+
+                entity.Property(e => e.AddDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("ADD_DATE")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.EventId).HasColumnName("EVENT_ID");
+
+                entity.Property(e => e.HoleNum).HasColumnName("HOLE_NUM");
+
+                entity.Property(e => e.Par).HasColumnName("PAR");
+
+                entity.Property(e => e.UpdateDate)
+                    .HasColumnType("datetime")
+                    .ValueGeneratedOnAddOrUpdate()
+                    .HasColumnName("UPDATE_DATE")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasOne(d => d.Event)
+                    .WithMany(p => p.EventHoleDims)
+                    .HasForeignKey(d => d.EventId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_EVENT_HOLE_EVENT_ID");
             });
 
             modelBuilder.Entity<EventPlayerDim>(entity =>
@@ -236,6 +292,49 @@ namespace LIVLens.Models
                     .HasForeignKey(d => d.PlayerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_EVENT_PLAYER_DIM_PLAYER_ID");
+            });
+
+            modelBuilder.Entity<EventPlayerScoreFact>(entity =>
+            {
+                entity.HasKey(e => e.EventPlayerScoreId)
+                    .HasName("PRIMARY");
+
+                entity.ToTable("EVENT_PLAYER_SCORE_FACT");
+
+                entity.HasIndex(e => e.EventHoleId, "FK_EVENT_PLAYER_SCORE_EVENT_HOLE_ID_idx");
+
+                entity.HasIndex(e => e.EventPlayerId, "FK_SURVEY_FACT_EVENT_PLAYER_ID_idx");
+
+                entity.Property(e => e.EventPlayerScoreId).HasColumnName("EVENT_PLAYER_SCORE_ID");
+
+                entity.Property(e => e.AddDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("ADD_DATE")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.EventHoleId).HasColumnName("EVENT_HOLE_ID");
+
+                entity.Property(e => e.EventPlayerId).HasColumnName("EVENT_PLAYER_ID");
+
+                entity.Property(e => e.Strokes).HasColumnName("STROKES");
+
+                entity.Property(e => e.UpdateDate)
+                    .HasColumnType("datetime")
+                    .ValueGeneratedOnAddOrUpdate()
+                    .HasColumnName("UPDATE_DATE")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasOne(d => d.EventHole)
+                    .WithMany(p => p.EventPlayerScoreFacts)
+                    .HasForeignKey(d => d.EventHoleId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_EVENT_PLAYER_SCORE_EVENT_HOLE_ID");
+
+                entity.HasOne(d => d.EventPlayer)
+                    .WithMany(p => p.EventPlayerScoreFacts)
+                    .HasForeignKey(d => d.EventPlayerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_EVENT_PLAYER_SCORE_EVENT_PLAYER_ID");
             });
 
             modelBuilder.Entity<PlayerDim>(entity =>
@@ -299,6 +398,14 @@ namespace LIVLens.Models
                     .HasColumnName("ADD_DATE")
                     .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                entity.Property(e => e.DeleteDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("DELETE_DATE");
+
+                entity.Property(e => e.InternalAttrCategory)
+                    .HasMaxLength(45)
+                    .HasColumnName("INTERNAL_ATTR_CATEGORY");
+
                 entity.Property(e => e.ProductCategory)
                     .HasMaxLength(45)
                     .HasColumnName("PRODUCT_CATEGORY");
@@ -327,9 +434,7 @@ namespace LIVLens.Models
 
                 entity.HasIndex(e => e.ProductTypeId, "FK_PRODUCT_TYPE_ID_idx");
 
-                entity.HasIndex(e => e.BrandId, "FK_SURVEY_FACT_BRAND_MODEL_ID_idx");
-
-                entity.HasIndex(e => e.ClubId, "FK_SURVEY_FACT_CLUB_ID_idx");
+                entity.HasIndex(e => e.BrandModelId, "FK_SURVEY_FACT_BRAND_MODEL_ID_idx");
 
                 entity.HasIndex(e => e.EventPlayerId, "FK_SURVEY_FACT_EVENT_PLAYER_ID_idx");
 
@@ -340,9 +445,7 @@ namespace LIVLens.Models
                     .HasColumnName("ADD_DATE")
                     .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                entity.Property(e => e.BrandId).HasColumnName("BRAND_ID");
-
-                entity.Property(e => e.ClubId).HasColumnName("CLUB_ID");
+                entity.Property(e => e.BrandModelId).HasColumnName("BRAND_MODEL_ID");
 
                 entity.Property(e => e.EventPlayerId).HasColumnName("EVENT_PLAYER_ID");
 
@@ -354,15 +457,11 @@ namespace LIVLens.Models
                     .HasColumnName("UPDATE_DATE")
                     .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                entity.HasOne(d => d.Brand)
+                entity.HasOne(d => d.BrandModel)
                     .WithMany(p => p.SurveyFacts)
-                    .HasForeignKey(d => d.BrandId)
+                    .HasForeignKey(d => d.BrandModelId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_SURVEY_FACT_BRAND_MODEL_ID");
-
-                entity.HasOne(d => d.Club)
-                    .WithMany(p => p.SurveyFacts)
-                    .HasForeignKey(d => d.ClubId)
-                    .HasConstraintName("FK_SURVEY_FACT_CLUB_ID");
 
                 entity.HasOne(d => d.EventPlayer)
                     .WithMany(p => p.SurveyFacts)
