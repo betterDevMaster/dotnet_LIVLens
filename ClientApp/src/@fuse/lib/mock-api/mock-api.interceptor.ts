@@ -34,6 +34,7 @@ export class FuseMockApiInterceptor implements HttpInterceptor {
         next: HttpHandler
     ): Observable<HttpEvent<any>> {
         // Try to get the request handler
+        // console.log('mock interceptor', request)
         const { handler, urlParams } = this._fuseMockApiService.findHandler(
             request.method.toUpperCase(),
             request.url

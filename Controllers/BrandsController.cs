@@ -88,7 +88,7 @@ namespace LIVLens.Controllers
         }
 
         // DELETE api/values/5
-        [HttpDelete("{id}")]
+        [HttpDelete("brand-models/{id}")]
         public async void DeleteBrandModel(int id)
         {
             var brandModelToDelete = await _brandModelRepo.FindById(id);

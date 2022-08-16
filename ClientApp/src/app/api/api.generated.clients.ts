@@ -8,368 +8,114 @@
 /* eslint-disable */
 // ReSharper disable InconsistentNaming
 
-import axios, { AxiosError } from 'axios';
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, CancelToken } from 'axios';
-
 export class LIVLensAPIClient {
-    private instance: AxiosInstance;
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(baseUrl?: string, instance?: AxiosInstance) {
-
-        this.instance = instance ? instance : axios.create();
-
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://livlens.azurewebsites.net";
-
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    brands_GetAll(  cancelToken?: CancelToken | undefined): Promise<string[]> {
+    brands_GetBrands(): Promise<BrandDim[]> {
         let url_ = this.baseUrl + "/api/Brands";
         url_ = url_.replace(/[?&]$/, "");
 
-        let options_: AxiosRequestConfig = {
+        let options_: RequestInit = {
             method: "GET",
-            url: url_,
             headers: {
                 "Accept": "application/json"
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processBrands_GetAll(_response);
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBrands_GetBrands(_response);
         });
     }
 
-    protected processBrands_GetAll(response: AxiosResponse): Promise<string[]> {
+    protected processBrands_GetBrands(response: Response): Promise<BrandDim[]> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200  = _responseText;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
-                    result200!.push(item);
+                    result200!.push(BrandDim.fromJS(item));
             }
             else {
                 result200 = <any>null;
             }
-            return Promise.resolve<string[]>(result200);
-
+            return result200;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
-        return Promise.resolve<string[]>(null as any);
+        return Promise.resolve<BrandDim[]>(null as any);
     }
 
-    brands_Post(value: string , cancelToken?: CancelToken | undefined): Promise<void> {
+    brands_AddBrand(brand: BrandDim): Promise<void> {
         let url_ = this.baseUrl + "/api/Brands";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(value);
+        const content_ = JSON.stringify(brand);
 
-        let options_: AxiosRequestConfig = {
-            data: content_,
+        let options_: RequestInit = {
+            body: content_,
             method: "POST",
-            url: url_,
             headers: {
                 "Content-Type": "application/json",
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processBrands_Post(_response);
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBrands_AddBrand(_response);
         });
     }
 
-    protected processBrands_Post(response: AxiosResponse): Promise<void> {
+    protected processBrands_AddBrand(response: Response): Promise<void> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
-            return Promise.resolve<void>(null as any);
-
+            return response.text().then((_responseText) => {
+            return;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<void>(null as any);
     }
 
-    brands_Get(id: number , cancelToken?: CancelToken | undefined): Promise<string> {
-        let url_ = this.baseUrl + "/api/Brands/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+    brands_GetBrandModels(): Promise<BrandModelDim[]> {
+        let url_ = this.baseUrl + "/api/Brands/brand-models";
         url_ = url_.replace(/[?&]$/, "");
 
-        let options_: AxiosRequestConfig = {
+        let options_: RequestInit = {
             method: "GET",
-            url: url_,
             headers: {
                 "Accept": "application/json"
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processBrands_Get(_response);
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBrands_GetBrandModels(_response);
         });
     }
 
-    protected processBrands_Get(response: AxiosResponse): Promise<string> {
+    protected processBrands_GetBrandModels(response: Response): Promise<BrandModelDim[]> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200  = _responseText;
-                result200 = resultData200 !== undefined ? resultData200 : <any>null;
-    
-            return Promise.resolve<string>(result200);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<string>(null as any);
-    }
-
-    brands_Put(id: number, value: string , cancelToken?: CancelToken | undefined): Promise<void> {
-        let url_ = this.baseUrl + "/api/Brands/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(value);
-
-        let options_: AxiosRequestConfig = {
-            data: content_,
-            method: "PUT",
-            url: url_,
-            headers: {
-                "Content-Type": "application/json",
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processBrands_Put(_response);
-        });
-    }
-
-    protected processBrands_Put(response: AxiosResponse): Promise<void> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            return Promise.resolve<void>(null as any);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    brands_Delete(id: number , cancelToken?: CancelToken | undefined): Promise<void> {
-        let url_ = this.baseUrl + "/api/Brands/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: AxiosRequestConfig = {
-            method: "DELETE",
-            url: url_,
-            headers: {
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processBrands_Delete(_response);
-        });
-    }
-
-    protected processBrands_Delete(response: AxiosResponse): Promise<void> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            return Promise.resolve<void>(null as any);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    equipment_GetClubs(  cancelToken?: CancelToken | undefined): Promise<ClubDim[]> {
-        let url_ = this.baseUrl + "/api/Equipment/clubs";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: AxiosRequestConfig = {
-            method: "GET",
-            url: url_,
-            headers: {
-                "Accept": "application/json"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processEquipment_GetClubs(_response);
-        });
-    }
-
-    protected processEquipment_GetClubs(response: AxiosResponse): Promise<ClubDim[]> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            let result200: any = null;
-            let resultData200  = _responseText;
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(ClubDim.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
-            return Promise.resolve<ClubDim[]>(result200);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<ClubDim[]>(null as any);
-    }
-
-    equipment_GetBrandModels(  cancelToken?: CancelToken | undefined): Promise<BrandModelDim[]> {
-        let url_ = this.baseUrl + "/api/Equipment/brand-models";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: AxiosRequestConfig = {
-            method: "GET",
-            url: url_,
-            headers: {
-                "Accept": "application/json"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processEquipment_GetBrandModels(_response);
-        });
-    }
-
-    protected processEquipment_GetBrandModels(response: AxiosResponse): Promise<BrandModelDim[]> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            let result200: any = null;
-            let resultData200  = _responseText;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
@@ -378,53 +124,369 @@ export class LIVLensAPIClient {
             else {
                 result200 = <any>null;
             }
-            return Promise.resolve<BrandModelDim[]>(result200);
-
+            return result200;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<BrandModelDim[]>(null as any);
     }
 
-    equipment_GetProductTypes(  cancelToken?: CancelToken | undefined): Promise<ProductTypeDim[]> {
+    brands_AddBrandModel(brandModel: BrandModelDim): Promise<void> {
+        let url_ = this.baseUrl + "/api/Brands/brand-models";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(brandModel);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBrands_AddBrandModel(_response);
+        });
+    }
+
+    protected processBrands_AddBrandModel(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    brands_GetBrandById(id: number): Promise<BrandDim> {
+        let url_ = this.baseUrl + "/api/Brands/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBrands_GetBrandById(_response);
+        });
+    }
+
+    protected processBrands_GetBrandById(response: Response): Promise<BrandDim> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BrandDim.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BrandDim>(null as any);
+    }
+
+    brands_UpdateBrand(id: number, brand: BrandDim): Promise<void> {
+        let url_ = this.baseUrl + "/api/Brands/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(brand);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBrands_UpdateBrand(_response);
+        });
+    }
+
+    protected processBrands_UpdateBrand(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    brands_DeleteBrand(id: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Brands/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBrands_DeleteBrand(_response);
+        });
+    }
+
+    protected processBrands_DeleteBrand(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    brands_GetBrandModelById(id: number): Promise<BrandModelDim> {
+        let url_ = this.baseUrl + "/api/Brands/brand-models/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBrands_GetBrandModelById(_response);
+        });
+    }
+
+    protected processBrands_GetBrandModelById(response: Response): Promise<BrandModelDim> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BrandModelDim.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BrandModelDim>(null as any);
+    }
+
+    brands_UpdateBrandModel(id: number, brandModel: BrandModelDim): Promise<void> {
+        let url_ = this.baseUrl + "/api/Brands/brand-models/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(brandModel);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBrands_UpdateBrandModel(_response);
+        });
+    }
+
+    protected processBrands_UpdateBrandModel(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    brands_DeleteBrandModel(id: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Brands/brand-models/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processBrands_DeleteBrandModel(_response);
+        });
+    }
+
+    protected processBrands_DeleteBrandModel(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    equipment_GetClubs(): Promise<ClubDim[]> {
+        let url_ = this.baseUrl + "/api/Equipment/clubs";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processEquipment_GetClubs(_response);
+        });
+    }
+
+    protected processEquipment_GetClubs(response: Response): Promise<ClubDim[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ClubDim.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ClubDim[]>(null as any);
+    }
+
+    equipment_GetBrandModels(): Promise<BrandModelDim[]> {
+        let url_ = this.baseUrl + "/api/Equipment/brand-models";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processEquipment_GetBrandModels(_response);
+        });
+    }
+
+    protected processEquipment_GetBrandModels(response: Response): Promise<BrandModelDim[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BrandModelDim.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BrandModelDim[]>(null as any);
+    }
+
+    equipment_GetProductTypes(): Promise<ProductTypeDim[]> {
         let url_ = this.baseUrl + "/api/Equipment/product-types";
         url_ = url_.replace(/[?&]$/, "");
 
-        let options_: AxiosRequestConfig = {
+        let options_: RequestInit = {
             method: "GET",
-            url: url_,
             headers: {
                 "Accept": "application/json"
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
+        return this.http.fetch(url_, options_).then((_response: Response) => {
             return this.processEquipment_GetProductTypes(_response);
         });
     }
 
-    protected processEquipment_GetProductTypes(response: AxiosResponse): Promise<ProductTypeDim[]> {
+    protected processEquipment_GetProductTypes(response: Response): Promise<ProductTypeDim[]> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200  = _responseText;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
@@ -433,53 +495,39 @@ export class LIVLensAPIClient {
             else {
                 result200 = <any>null;
             }
-            return Promise.resolve<ProductTypeDim[]>(result200);
-
+            return result200;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<ProductTypeDim[]>(null as any);
     }
 
-    events_GetAll(  cancelToken?: CancelToken | undefined): Promise<EventDim[]> {
+    events_GetAll(): Promise<EventDim[]> {
         let url_ = this.baseUrl + "/api/Events";
         url_ = url_.replace(/[?&]$/, "");
 
-        let options_: AxiosRequestConfig = {
+        let options_: RequestInit = {
             method: "GET",
-            url: url_,
             headers: {
                 "Accept": "application/json"
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
+        return this.http.fetch(url_, options_).then((_response: Response) => {
             return this.processEvents_GetAll(_response);
         });
     }
 
-    protected processEvents_GetAll(response: AxiosResponse): Promise<EventDim[]> {
+    protected processEvents_GetAll(response: Response): Promise<EventDim[]> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200  = _responseText;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
@@ -488,115 +536,88 @@ export class LIVLensAPIClient {
             else {
                 result200 = <any>null;
             }
-            return Promise.resolve<EventDim[]>(result200);
-
+            return result200;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<EventDim[]>(null as any);
     }
 
-    events_Post(newEvent: EventDim , cancelToken?: CancelToken | undefined): Promise<void> {
+    events_Post(newEvent: EventDim): Promise<void> {
         let url_ = this.baseUrl + "/api/Events";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(newEvent);
 
-        let options_: AxiosRequestConfig = {
-            data: content_,
+        let options_: RequestInit = {
+            body: content_,
             method: "POST",
-            url: url_,
             headers: {
                 "Content-Type": "application/json",
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
+        return this.http.fetch(url_, options_).then((_response: Response) => {
             return this.processEvents_Post(_response);
         });
     }
 
-    protected processEvents_Post(response: AxiosResponse): Promise<void> {
+    protected processEvents_Post(response: Response): Promise<void> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
-            return Promise.resolve<void>(null as any);
-
+            return response.text().then((_responseText) => {
+            return;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<void>(null as any);
     }
 
-    events_Get(id: number , cancelToken?: CancelToken | undefined): Promise<EventDim> {
+    events_Get(id: number): Promise<EventDim> {
         let url_ = this.baseUrl + "/api/Events/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
-        let options_: AxiosRequestConfig = {
+        let options_: RequestInit = {
             method: "GET",
-            url: url_,
             headers: {
                 "Accept": "application/json"
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
+        return this.http.fetch(url_, options_).then((_response: Response) => {
             return this.processEvents_Get(_response);
         });
     }
 
-    protected processEvents_Get(response: AxiosResponse): Promise<EventDim> {
+    protected processEvents_Get(response: Response): Promise<EventDim> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200  = _responseText;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result200 = EventDim.fromJS(resultData200);
-            return Promise.resolve<EventDim>(result200);
-
+            return result200;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<EventDim>(null as any);
     }
 
-    events_Put(id: number, updatedEvent: EventDim , cancelToken?: CancelToken | undefined): Promise<void> {
+    events_Put(id: number, updatedEvent: EventDim): Promise<void> {
         let url_ = this.baseUrl + "/api/Events/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -605,133 +626,90 @@ export class LIVLensAPIClient {
 
         const content_ = JSON.stringify(updatedEvent);
 
-        let options_: AxiosRequestConfig = {
-            data: content_,
+        let options_: RequestInit = {
+            body: content_,
             method: "PUT",
-            url: url_,
             headers: {
                 "Content-Type": "application/json",
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
+        return this.http.fetch(url_, options_).then((_response: Response) => {
             return this.processEvents_Put(_response);
         });
     }
 
-    protected processEvents_Put(response: AxiosResponse): Promise<void> {
+    protected processEvents_Put(response: Response): Promise<void> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
-            return Promise.resolve<void>(null as any);
-
+            return response.text().then((_responseText) => {
+            return;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<void>(null as any);
     }
 
-    events_Delete(id: number , cancelToken?: CancelToken | undefined): Promise<void> {
+    events_Delete(id: number): Promise<void> {
         let url_ = this.baseUrl + "/api/Events/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
-        let options_: AxiosRequestConfig = {
+        let options_: RequestInit = {
             method: "DELETE",
-            url: url_,
             headers: {
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
+        return this.http.fetch(url_, options_).then((_response: Response) => {
             return this.processEvents_Delete(_response);
         });
     }
 
-    protected processEvents_Delete(response: AxiosResponse): Promise<void> {
+    protected processEvents_Delete(response: Response): Promise<void> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
-            return Promise.resolve<void>(null as any);
-
+            return response.text().then((_responseText) => {
+            return;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<void>(null as any);
     }
 
-    players_GetAll(  cancelToken?: CancelToken | undefined): Promise<PlayerDim[]> {
+    players_GetAll(): Promise<PlayerDim[]> {
         let url_ = this.baseUrl + "/api/Players";
         url_ = url_.replace(/[?&]$/, "");
 
-        let options_: AxiosRequestConfig = {
+        let options_: RequestInit = {
             method: "GET",
-            url: url_,
             headers: {
                 "Accept": "application/json"
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
+        return this.http.fetch(url_, options_).then((_response: Response) => {
             return this.processPlayers_GetAll(_response);
         });
     }
 
-    protected processPlayers_GetAll(response: AxiosResponse): Promise<PlayerDim[]> {
+    protected processPlayers_GetAll(response: Response): Promise<PlayerDim[]> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200  = _responseText;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
@@ -740,115 +718,88 @@ export class LIVLensAPIClient {
             else {
                 result200 = <any>null;
             }
-            return Promise.resolve<PlayerDim[]>(result200);
-
+            return result200;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<PlayerDim[]>(null as any);
     }
 
-    players_Post(newPlayer: PlayerDim , cancelToken?: CancelToken | undefined): Promise<void> {
+    players_Post(newPlayer: PlayerDim): Promise<void> {
         let url_ = this.baseUrl + "/api/Players";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(newPlayer);
 
-        let options_: AxiosRequestConfig = {
-            data: content_,
+        let options_: RequestInit = {
+            body: content_,
             method: "POST",
-            url: url_,
             headers: {
                 "Content-Type": "application/json",
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
+        return this.http.fetch(url_, options_).then((_response: Response) => {
             return this.processPlayers_Post(_response);
         });
     }
 
-    protected processPlayers_Post(response: AxiosResponse): Promise<void> {
+    protected processPlayers_Post(response: Response): Promise<void> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
-            return Promise.resolve<void>(null as any);
-
+            return response.text().then((_responseText) => {
+            return;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<void>(null as any);
     }
 
-    players_Get(id: number , cancelToken?: CancelToken | undefined): Promise<PlayerDim> {
+    players_Get(id: number): Promise<PlayerDim> {
         let url_ = this.baseUrl + "/api/Players/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
-        let options_: AxiosRequestConfig = {
+        let options_: RequestInit = {
             method: "GET",
-            url: url_,
             headers: {
                 "Accept": "application/json"
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
+        return this.http.fetch(url_, options_).then((_response: Response) => {
             return this.processPlayers_Get(_response);
         });
     }
 
-    protected processPlayers_Get(response: AxiosResponse): Promise<PlayerDim> {
+    protected processPlayers_Get(response: Response): Promise<PlayerDim> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             let result200: any = null;
-            let resultData200  = _responseText;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result200 = PlayerDim.fromJS(resultData200);
-            return Promise.resolve<PlayerDim>(result200);
-
+            return result200;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<PlayerDim>(null as any);
     }
 
-    players_Put(id: number, updatedPlayer: PlayerDim , cancelToken?: CancelToken | undefined): Promise<void> {
+    players_Put(id: number, updatedPlayer: PlayerDim): Promise<void> {
         let url_ = this.baseUrl + "/api/Players/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -857,300 +808,74 @@ export class LIVLensAPIClient {
 
         const content_ = JSON.stringify(updatedPlayer);
 
-        let options_: AxiosRequestConfig = {
-            data: content_,
+        let options_: RequestInit = {
+            body: content_,
             method: "PUT",
-            url: url_,
             headers: {
                 "Content-Type": "application/json",
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
+        return this.http.fetch(url_, options_).then((_response: Response) => {
             return this.processPlayers_Put(_response);
         });
     }
 
-    protected processPlayers_Put(response: AxiosResponse): Promise<void> {
+    protected processPlayers_Put(response: Response): Promise<void> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
-            return Promise.resolve<void>(null as any);
-
+            return response.text().then((_responseText) => {
+            return;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<void>(null as any);
     }
 
-    players_Delete(id: number , cancelToken?: CancelToken | undefined): Promise<void> {
+    players_Delete(id: number): Promise<void> {
         let url_ = this.baseUrl + "/api/Players/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
-        let options_: AxiosRequestConfig = {
+        let options_: RequestInit = {
             method: "DELETE",
-            url: url_,
             headers: {
-            },
-            cancelToken
+            }
         };
 
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
+        return this.http.fetch(url_, options_).then((_response: Response) => {
             return this.processPlayers_Delete(_response);
         });
     }
 
-    protected processPlayers_Delete(response: AxiosResponse): Promise<void> {
+    protected processPlayers_Delete(response: Response): Promise<void> {
         const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            const _responseText = response.data;
-            return Promise.resolve<void>(null as any);
-
+            return response.text().then((_responseText) => {
+            return;
+            });
         } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
+            return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
         }
         return Promise.resolve<void>(null as any);
     }
-
-    weatherForecast_Get(  cancelToken?: CancelToken | undefined): Promise<WeatherForecast[]> {
-        let url_ = this.baseUrl + "/api/WeatherForecast";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: AxiosRequestConfig = {
-            method: "GET",
-            url: url_,
-            headers: {
-                "Accept": "application/json"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processWeatherForecast_Get(_response);
-        });
-    }
-
-    protected processWeatherForecast_Get(response: AxiosResponse): Promise<WeatherForecast[]> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (let k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            let result200: any = null;
-            let resultData200  = _responseText;
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(WeatherForecast.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
-            return Promise.resolve<WeatherForecast[]>(result200);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<WeatherForecast[]>(null as any);
-    }
-}
-
-export class ClubDim implements IClubDim {
-    clubId!: number;
-    brandId?: number | undefined;
-    manufacturer!: string;
-    model!: string;
-    surveyFacts!: SurveyFact[];
-
-    constructor(data?: IClubDim) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-        if (!data) {
-            this.surveyFacts = [];
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.clubId = _data["clubId"];
-            this.brandId = _data["brandId"];
-            this.manufacturer = _data["manufacturer"];
-            this.model = _data["model"];
-            if (Array.isArray(_data["surveyFacts"])) {
-                this.surveyFacts = [] as any;
-                for (let item of _data["surveyFacts"])
-                    this.surveyFacts!.push(SurveyFact.fromJS(item));
-            }
-        }
-    }
-
-    static fromJS(data: any): ClubDim {
-        data = typeof data === 'object' ? data : {};
-        let result = new ClubDim();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["clubId"] = this.clubId;
-        data["brandId"] = this.brandId;
-        data["manufacturer"] = this.manufacturer;
-        data["model"] = this.model;
-        if (Array.isArray(this.surveyFacts)) {
-            data["surveyFacts"] = [];
-            for (let item of this.surveyFacts)
-                data["surveyFacts"].push(item.toJSON());
-        }
-        return data;
-    }
-}
-
-export interface IClubDim {
-    clubId: number;
-    brandId?: number | undefined;
-    manufacturer: string;
-    model: string;
-    surveyFacts: SurveyFact[];
-}
-
-export class SurveyFact implements ISurveyFact {
-    surveyId!: number;
-    eventPlayerId!: number;
-    productTypeId!: number;
-    brandId?: number | undefined;
-    clubId?: number | undefined;
-    addDate!: Date;
-    updateDate!: Date;
-    brand?: BrandDim | undefined;
-    club?: ClubDim | undefined;
-    eventPlayer!: EventPlayerDim;
-    productType!: ProductTypeDim;
-
-    constructor(data?: ISurveyFact) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-        if (!data) {
-            this.eventPlayer = new EventPlayerDim();
-            this.productType = new ProductTypeDim();
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.surveyId = _data["surveyId"];
-            this.eventPlayerId = _data["eventPlayerId"];
-            this.productTypeId = _data["productTypeId"];
-            this.brandId = _data["brandId"];
-            this.clubId = _data["clubId"];
-            this.addDate = _data["addDate"] ? new Date(_data["addDate"].toString()) : <any>undefined;
-            this.updateDate = _data["updateDate"] ? new Date(_data["updateDate"].toString()) : <any>undefined;
-            this.brand = _data["brand"] ? BrandDim.fromJS(_data["brand"]) : <any>undefined;
-            this.club = _data["club"] ? ClubDim.fromJS(_data["club"]) : <any>undefined;
-            this.eventPlayer = _data["eventPlayer"] ? EventPlayerDim.fromJS(_data["eventPlayer"]) : new EventPlayerDim();
-            this.productType = _data["productType"] ? ProductTypeDim.fromJS(_data["productType"]) : new ProductTypeDim();
-        }
-    }
-
-    static fromJS(data: any): SurveyFact {
-        data = typeof data === 'object' ? data : {};
-        let result = new SurveyFact();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["surveyId"] = this.surveyId;
-        data["eventPlayerId"] = this.eventPlayerId;
-        data["productTypeId"] = this.productTypeId;
-        data["brandId"] = this.brandId;
-        data["clubId"] = this.clubId;
-        data["addDate"] = this.addDate ? this.addDate.toISOString() : <any>undefined;
-        data["updateDate"] = this.updateDate ? this.updateDate.toISOString() : <any>undefined;
-        data["brand"] = this.brand ? this.brand.toJSON() : <any>undefined;
-        data["club"] = this.club ? this.club.toJSON() : <any>undefined;
-        data["eventPlayer"] = this.eventPlayer ? this.eventPlayer.toJSON() : <any>undefined;
-        data["productType"] = this.productType ? this.productType.toJSON() : <any>undefined;
-        return data;
-    }
-}
-
-export interface ISurveyFact {
-    surveyId: number;
-    eventPlayerId: number;
-    productTypeId: number;
-    brandId?: number | undefined;
-    clubId?: number | undefined;
-    addDate: Date;
-    updateDate: Date;
-    brand?: BrandDim | undefined;
-    club?: ClubDim | undefined;
-    eventPlayer: EventPlayerDim;
-    productType: ProductTypeDim;
 }
 
 export class BrandDim implements IBrandDim {
-    brandId!: number;
-    brand!: string;
-    addDate!: Date;
-    updateDate!: Date;
-    surveyFacts!: SurveyFact[];
+    brandId?: number;
+    brand?: string;
+    addDate?: Date;
+    updateDate?: Date;
+    deleteDate?: Date | undefined;
 
     constructor(data?: IBrandDim) {
         if (data) {
@@ -1158,9 +883,6 @@ export class BrandDim implements IBrandDim {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-        }
-        if (!data) {
-            this.surveyFacts = [];
         }
     }
 
@@ -1170,11 +892,7 @@ export class BrandDim implements IBrandDim {
             this.brand = _data["brand"];
             this.addDate = _data["addDate"] ? new Date(_data["addDate"].toString()) : <any>undefined;
             this.updateDate = _data["updateDate"] ? new Date(_data["updateDate"].toString()) : <any>undefined;
-            if (Array.isArray(_data["surveyFacts"])) {
-                this.surveyFacts = [] as any;
-                for (let item of _data["surveyFacts"])
-                    this.surveyFacts!.push(SurveyFact.fromJS(item));
-            }
+            this.deleteDate = _data["deleteDate"] ? new Date(_data["deleteDate"].toString()) : <any>undefined;
         }
     }
 
@@ -1191,6 +909,74 @@ export class BrandDim implements IBrandDim {
         data["brand"] = this.brand;
         data["addDate"] = this.addDate ? this.addDate.toISOString() : <any>undefined;
         data["updateDate"] = this.updateDate ? this.updateDate.toISOString() : <any>undefined;
+        data["deleteDate"] = this.deleteDate ? this.deleteDate.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IBrandDim {
+    brandId?: number;
+    brand?: string;
+    addDate?: Date;
+    updateDate?: Date;
+    deleteDate?: Date | undefined;
+}
+
+export class BrandModelDim implements IBrandModelDim {
+    brandModelId?: number;
+    brandId?: number;
+    brand?: string;
+    model?: string;
+    internalAttrCategory?: string | undefined;
+    addDate?: Date;
+    deleteDate?: Date | undefined;
+    updateDate?: Date;
+    surveyFacts?: SurveyFact[];
+
+    constructor(data?: IBrandModelDim) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.brandModelId = _data["brandModelId"];
+            this.brandId = _data["brandId"];
+            this.brand = _data["brand"];
+            this.model = _data["model"];
+            this.internalAttrCategory = _data["internalAttrCategory"];
+            this.addDate = _data["addDate"] ? new Date(_data["addDate"].toString()) : <any>undefined;
+            this.deleteDate = _data["deleteDate"] ? new Date(_data["deleteDate"].toString()) : <any>undefined;
+            this.updateDate = _data["updateDate"] ? new Date(_data["updateDate"].toString()) : <any>undefined;
+            if (Array.isArray(_data["surveyFacts"])) {
+                this.surveyFacts = [] as any;
+                for (let item of _data["surveyFacts"])
+                    this.surveyFacts!.push(SurveyFact.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): BrandModelDim {
+        data = typeof data === 'object' ? data : {};
+        let result = new BrandModelDim();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["brandModelId"] = this.brandModelId;
+        data["brandId"] = this.brandId;
+        data["brand"] = this.brand;
+        data["model"] = this.model;
+        data["internalAttrCategory"] = this.internalAttrCategory;
+        data["addDate"] = this.addDate ? this.addDate.toISOString() : <any>undefined;
+        data["deleteDate"] = this.deleteDate ? this.deleteDate.toISOString() : <any>undefined;
+        data["updateDate"] = this.updateDate ? this.updateDate.toISOString() : <any>undefined;
         if (Array.isArray(this.surveyFacts)) {
             data["surveyFacts"] = [];
             for (let item of this.surveyFacts)
@@ -1200,25 +986,98 @@ export class BrandDim implements IBrandDim {
     }
 }
 
-export interface IBrandDim {
-    brandId: number;
-    brand: string;
-    addDate: Date;
-    updateDate: Date;
-    surveyFacts: SurveyFact[];
+export interface IBrandModelDim {
+    brandModelId?: number;
+    brandId?: number;
+    brand?: string;
+    model?: string;
+    internalAttrCategory?: string | undefined;
+    addDate?: Date;
+    deleteDate?: Date | undefined;
+    updateDate?: Date;
+    surveyFacts?: SurveyFact[];
+}
+
+export class SurveyFact implements ISurveyFact {
+    surveyId?: number;
+    eventPlayerId?: number;
+    productTypeId?: number;
+    brandModelId?: number;
+    addDate?: Date;
+    updateDate?: Date;
+    brandModel?: BrandModelDim;
+    eventPlayer?: EventPlayerDim;
+    productType?: ProductTypeDim;
+
+    constructor(data?: ISurveyFact) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.surveyId = _data["surveyId"];
+            this.eventPlayerId = _data["eventPlayerId"];
+            this.productTypeId = _data["productTypeId"];
+            this.brandModelId = _data["brandModelId"];
+            this.addDate = _data["addDate"] ? new Date(_data["addDate"].toString()) : <any>undefined;
+            this.updateDate = _data["updateDate"] ? new Date(_data["updateDate"].toString()) : <any>undefined;
+            this.brandModel = _data["brandModel"] ? BrandModelDim.fromJS(_data["brandModel"]) : <any>undefined;
+            this.eventPlayer = _data["eventPlayer"] ? EventPlayerDim.fromJS(_data["eventPlayer"]) : <any>undefined;
+            this.productType = _data["productType"] ? ProductTypeDim.fromJS(_data["productType"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): SurveyFact {
+        data = typeof data === 'object' ? data : {};
+        let result = new SurveyFact();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["surveyId"] = this.surveyId;
+        data["eventPlayerId"] = this.eventPlayerId;
+        data["productTypeId"] = this.productTypeId;
+        data["brandModelId"] = this.brandModelId;
+        data["addDate"] = this.addDate ? this.addDate.toISOString() : <any>undefined;
+        data["updateDate"] = this.updateDate ? this.updateDate.toISOString() : <any>undefined;
+        data["brandModel"] = this.brandModel ? this.brandModel.toJSON() : <any>undefined;
+        data["eventPlayer"] = this.eventPlayer ? this.eventPlayer.toJSON() : <any>undefined;
+        data["productType"] = this.productType ? this.productType.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface ISurveyFact {
+    surveyId?: number;
+    eventPlayerId?: number;
+    productTypeId?: number;
+    brandModelId?: number;
+    addDate?: Date;
+    updateDate?: Date;
+    brandModel?: BrandModelDim;
+    eventPlayer?: EventPlayerDim;
+    productType?: ProductTypeDim;
 }
 
 export class EventPlayerDim implements IEventPlayerDim {
-    eventPlayerId!: number;
-    eventId!: number;
-    playerId!: number;
+    eventPlayerId?: number;
+    eventId?: number;
+    playerId?: number;
     teeTime?: Date | undefined;
-    playedInd!: number;
-    addDate!: Date;
-    updateDate!: Date;
-    event!: EventDim;
-    player!: PlayerDim;
-    surveyFacts!: SurveyFact[];
+    playedInd?: number;
+    addDate?: Date;
+    updateDate?: Date;
+    event?: EventDim;
+    player?: PlayerDim;
+    eventPlayerScoreFacts?: EventPlayerScoreFact[];
+    surveyFacts?: SurveyFact[];
 
     constructor(data?: IEventPlayerDim) {
         if (data) {
@@ -1226,11 +1085,6 @@ export class EventPlayerDim implements IEventPlayerDim {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-        }
-        if (!data) {
-            this.event = new EventDim();
-            this.player = new PlayerDim();
-            this.surveyFacts = [];
         }
     }
 
@@ -1243,8 +1097,13 @@ export class EventPlayerDim implements IEventPlayerDim {
             this.playedInd = _data["playedInd"];
             this.addDate = _data["addDate"] ? new Date(_data["addDate"].toString()) : <any>undefined;
             this.updateDate = _data["updateDate"] ? new Date(_data["updateDate"].toString()) : <any>undefined;
-            this.event = _data["event"] ? EventDim.fromJS(_data["event"]) : new EventDim();
-            this.player = _data["player"] ? PlayerDim.fromJS(_data["player"]) : new PlayerDim();
+            this.event = _data["event"] ? EventDim.fromJS(_data["event"]) : <any>undefined;
+            this.player = _data["player"] ? PlayerDim.fromJS(_data["player"]) : <any>undefined;
+            if (Array.isArray(_data["eventPlayerScoreFacts"])) {
+                this.eventPlayerScoreFacts = [] as any;
+                for (let item of _data["eventPlayerScoreFacts"])
+                    this.eventPlayerScoreFacts!.push(EventPlayerScoreFact.fromJS(item));
+            }
             if (Array.isArray(_data["surveyFacts"])) {
                 this.surveyFacts = [] as any;
                 for (let item of _data["surveyFacts"])
@@ -1271,6 +1130,11 @@ export class EventPlayerDim implements IEventPlayerDim {
         data["updateDate"] = this.updateDate ? this.updateDate.toISOString() : <any>undefined;
         data["event"] = this.event ? this.event.toJSON() : <any>undefined;
         data["player"] = this.player ? this.player.toJSON() : <any>undefined;
+        if (Array.isArray(this.eventPlayerScoreFacts)) {
+            data["eventPlayerScoreFacts"] = [];
+            for (let item of this.eventPlayerScoreFacts)
+                data["eventPlayerScoreFacts"].push(item.toJSON());
+        }
         if (Array.isArray(this.surveyFacts)) {
             data["surveyFacts"] = [];
             for (let item of this.surveyFacts)
@@ -1281,29 +1145,32 @@ export class EventPlayerDim implements IEventPlayerDim {
 }
 
 export interface IEventPlayerDim {
-    eventPlayerId: number;
-    eventId: number;
-    playerId: number;
+    eventPlayerId?: number;
+    eventId?: number;
+    playerId?: number;
     teeTime?: Date | undefined;
-    playedInd: number;
-    addDate: Date;
-    updateDate: Date;
-    event: EventDim;
-    player: PlayerDim;
-    surveyFacts: SurveyFact[];
+    playedInd?: number;
+    addDate?: Date;
+    updateDate?: Date;
+    event?: EventDim;
+    player?: PlayerDim;
+    eventPlayerScoreFacts?: EventPlayerScoreFact[];
+    surveyFacts?: SurveyFact[];
 }
 
 export class EventDim implements IEventDim {
-    eventId!: number;
-    eventName!: string;
-    city!: string;
-    state!: string;
-    country!: string;
-    courseName!: string;
-    eventDate!: Date;
-    addDate!: Date;
-    updateDate!: Date;
-    eventPlayerDims!: EventPlayerDim[];
+    eventId?: number;
+    eventName?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    courseName?: string;
+    eventDate?: Date;
+    coursePar?: number | undefined;
+    addDate?: Date;
+    updateDate?: Date;
+    eventHoleDims?: EventHoleDim[];
+    eventPlayerDims?: EventPlayerDim[];
 
     constructor(data?: IEventDim) {
         if (data) {
@@ -1311,9 +1178,6 @@ export class EventDim implements IEventDim {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-        }
-        if (!data) {
-            this.eventPlayerDims = [];
         }
     }
 
@@ -1326,8 +1190,14 @@ export class EventDim implements IEventDim {
             this.country = _data["country"];
             this.courseName = _data["courseName"];
             this.eventDate = _data["eventDate"] ? new Date(_data["eventDate"].toString()) : <any>undefined;
+            this.coursePar = _data["coursePar"];
             this.addDate = _data["addDate"] ? new Date(_data["addDate"].toString()) : <any>undefined;
             this.updateDate = _data["updateDate"] ? new Date(_data["updateDate"].toString()) : <any>undefined;
+            if (Array.isArray(_data["eventHoleDims"])) {
+                this.eventHoleDims = [] as any;
+                for (let item of _data["eventHoleDims"])
+                    this.eventHoleDims!.push(EventHoleDim.fromJS(item));
+            }
             if (Array.isArray(_data["eventPlayerDims"])) {
                 this.eventPlayerDims = [] as any;
                 for (let item of _data["eventPlayerDims"])
@@ -1352,8 +1222,14 @@ export class EventDim implements IEventDim {
         data["country"] = this.country;
         data["courseName"] = this.courseName;
         data["eventDate"] = this.eventDate ? this.eventDate.toISOString() : <any>undefined;
+        data["coursePar"] = this.coursePar;
         data["addDate"] = this.addDate ? this.addDate.toISOString() : <any>undefined;
         data["updateDate"] = this.updateDate ? this.updateDate.toISOString() : <any>undefined;
+        if (Array.isArray(this.eventHoleDims)) {
+            data["eventHoleDims"] = [];
+            for (let item of this.eventHoleDims)
+                data["eventHoleDims"].push(item.toJSON());
+        }
         if (Array.isArray(this.eventPlayerDims)) {
             data["eventPlayerDims"] = [];
             for (let item of this.eventPlayerDims)
@@ -1364,30 +1240,168 @@ export class EventDim implements IEventDim {
 }
 
 export interface IEventDim {
-    eventId: number;
-    eventName: string;
-    city: string;
-    state: string;
-    country: string;
-    courseName: string;
-    eventDate: Date;
-    addDate: Date;
-    updateDate: Date;
-    eventPlayerDims: EventPlayerDim[];
+    eventId?: number;
+    eventName?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    courseName?: string;
+    eventDate?: Date;
+    coursePar?: number | undefined;
+    addDate?: Date;
+    updateDate?: Date;
+    eventHoleDims?: EventHoleDim[];
+    eventPlayerDims?: EventPlayerDim[];
+}
+
+export class EventHoleDim implements IEventHoleDim {
+    eventHoleId?: number;
+    eventId?: number;
+    holeNum?: number;
+    par?: number;
+    addDate?: Date;
+    updateDate?: Date;
+    event?: EventDim;
+    eventPlayerScoreFacts?: EventPlayerScoreFact[];
+
+    constructor(data?: IEventHoleDim) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.eventHoleId = _data["eventHoleId"];
+            this.eventId = _data["eventId"];
+            this.holeNum = _data["holeNum"];
+            this.par = _data["par"];
+            this.addDate = _data["addDate"] ? new Date(_data["addDate"].toString()) : <any>undefined;
+            this.updateDate = _data["updateDate"] ? new Date(_data["updateDate"].toString()) : <any>undefined;
+            this.event = _data["event"] ? EventDim.fromJS(_data["event"]) : <any>undefined;
+            if (Array.isArray(_data["eventPlayerScoreFacts"])) {
+                this.eventPlayerScoreFacts = [] as any;
+                for (let item of _data["eventPlayerScoreFacts"])
+                    this.eventPlayerScoreFacts!.push(EventPlayerScoreFact.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): EventHoleDim {
+        data = typeof data === 'object' ? data : {};
+        let result = new EventHoleDim();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["eventHoleId"] = this.eventHoleId;
+        data["eventId"] = this.eventId;
+        data["holeNum"] = this.holeNum;
+        data["par"] = this.par;
+        data["addDate"] = this.addDate ? this.addDate.toISOString() : <any>undefined;
+        data["updateDate"] = this.updateDate ? this.updateDate.toISOString() : <any>undefined;
+        data["event"] = this.event ? this.event.toJSON() : <any>undefined;
+        if (Array.isArray(this.eventPlayerScoreFacts)) {
+            data["eventPlayerScoreFacts"] = [];
+            for (let item of this.eventPlayerScoreFacts)
+                data["eventPlayerScoreFacts"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IEventHoleDim {
+    eventHoleId?: number;
+    eventId?: number;
+    holeNum?: number;
+    par?: number;
+    addDate?: Date;
+    updateDate?: Date;
+    event?: EventDim;
+    eventPlayerScoreFacts?: EventPlayerScoreFact[];
+}
+
+export class EventPlayerScoreFact implements IEventPlayerScoreFact {
+    eventPlayerScoreId?: number;
+    eventPlayerId?: number;
+    eventHoleId?: number;
+    strokes?: number;
+    addDate?: Date;
+    updateDate?: Date;
+    eventHole?: EventHoleDim;
+    eventPlayer?: EventPlayerDim;
+
+    constructor(data?: IEventPlayerScoreFact) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.eventPlayerScoreId = _data["eventPlayerScoreId"];
+            this.eventPlayerId = _data["eventPlayerId"];
+            this.eventHoleId = _data["eventHoleId"];
+            this.strokes = _data["strokes"];
+            this.addDate = _data["addDate"] ? new Date(_data["addDate"].toString()) : <any>undefined;
+            this.updateDate = _data["updateDate"] ? new Date(_data["updateDate"].toString()) : <any>undefined;
+            this.eventHole = _data["eventHole"] ? EventHoleDim.fromJS(_data["eventHole"]) : <any>undefined;
+            this.eventPlayer = _data["eventPlayer"] ? EventPlayerDim.fromJS(_data["eventPlayer"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): EventPlayerScoreFact {
+        data = typeof data === 'object' ? data : {};
+        let result = new EventPlayerScoreFact();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["eventPlayerScoreId"] = this.eventPlayerScoreId;
+        data["eventPlayerId"] = this.eventPlayerId;
+        data["eventHoleId"] = this.eventHoleId;
+        data["strokes"] = this.strokes;
+        data["addDate"] = this.addDate ? this.addDate.toISOString() : <any>undefined;
+        data["updateDate"] = this.updateDate ? this.updateDate.toISOString() : <any>undefined;
+        data["eventHole"] = this.eventHole ? this.eventHole.toJSON() : <any>undefined;
+        data["eventPlayer"] = this.eventPlayer ? this.eventPlayer.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IEventPlayerScoreFact {
+    eventPlayerScoreId?: number;
+    eventPlayerId?: number;
+    eventHoleId?: number;
+    strokes?: number;
+    addDate?: Date;
+    updateDate?: Date;
+    eventHole?: EventHoleDim;
+    eventPlayer?: EventPlayerDim;
 }
 
 export class PlayerDim implements IPlayerDim {
-    playerId!: number;
-    firstName!: string;
-    lastName!: string;
+    playerId?: number;
+    firstName?: string;
+    lastName?: string;
     dob?: string | undefined;
     gender?: string | undefined;
     countryName?: string | undefined;
     countryCode?: string | undefined;
     amateur?: number | undefined;
-    addDate!: Date;
-    updateDate!: Date;
-    eventPlayerDims!: EventPlayerDim[];
+    addDate?: Date;
+    updateDate?: Date;
+    eventPlayerDims?: EventPlayerDim[];
 
     constructor(data?: IPlayerDim) {
         if (data) {
@@ -1395,9 +1409,6 @@ export class PlayerDim implements IPlayerDim {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-        }
-        if (!data) {
-            this.eventPlayerDims = [];
         }
     }
 
@@ -1450,27 +1461,29 @@ export class PlayerDim implements IPlayerDim {
 }
 
 export interface IPlayerDim {
-    playerId: number;
-    firstName: string;
-    lastName: string;
+    playerId?: number;
+    firstName?: string;
+    lastName?: string;
     dob?: string | undefined;
     gender?: string | undefined;
     countryName?: string | undefined;
     countryCode?: string | undefined;
     amateur?: number | undefined;
-    addDate: Date;
-    updateDate: Date;
-    eventPlayerDims: EventPlayerDim[];
+    addDate?: Date;
+    updateDate?: Date;
+    eventPlayerDims?: EventPlayerDim[];
 }
 
 export class ProductTypeDim implements IProductTypeDim {
-    productTypeId!: number;
-    productCategory!: string;
+    productTypeId?: number;
+    productCategory?: string;
     productSubCategory?: string | undefined;
-    productType!: string;
-    addDate!: Date;
-    updateDate!: Date;
-    surveyFacts!: SurveyFact[];
+    productType?: string;
+    internalAttrCategory?: string | undefined;
+    addDate?: Date;
+    deleteDate?: Date | undefined;
+    updateDate?: Date;
+    surveyFacts?: SurveyFact[];
 
     constructor(data?: IProductTypeDim) {
         if (data) {
@@ -1478,9 +1491,6 @@ export class ProductTypeDim implements IProductTypeDim {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
-        }
-        if (!data) {
-            this.surveyFacts = [];
         }
     }
 
@@ -1490,7 +1500,9 @@ export class ProductTypeDim implements IProductTypeDim {
             this.productCategory = _data["productCategory"];
             this.productSubCategory = _data["productSubCategory"];
             this.productType = _data["productType"];
+            this.internalAttrCategory = _data["internalAttrCategory"];
             this.addDate = _data["addDate"] ? new Date(_data["addDate"].toString()) : <any>undefined;
+            this.deleteDate = _data["deleteDate"] ? new Date(_data["deleteDate"].toString()) : <any>undefined;
             this.updateDate = _data["updateDate"] ? new Date(_data["updateDate"].toString()) : <any>undefined;
             if (Array.isArray(_data["surveyFacts"])) {
                 this.surveyFacts = [] as any;
@@ -1513,7 +1525,9 @@ export class ProductTypeDim implements IProductTypeDim {
         data["productCategory"] = this.productCategory;
         data["productSubCategory"] = this.productSubCategory;
         data["productType"] = this.productType;
+        data["internalAttrCategory"] = this.internalAttrCategory;
         data["addDate"] = this.addDate ? this.addDate.toISOString() : <any>undefined;
+        data["deleteDate"] = this.deleteDate ? this.deleteDate.toISOString() : <any>undefined;
         data["updateDate"] = this.updateDate ? this.updateDate.toISOString() : <any>undefined;
         if (Array.isArray(this.surveyFacts)) {
             data["surveyFacts"] = [];
@@ -1525,23 +1539,24 @@ export class ProductTypeDim implements IProductTypeDim {
 }
 
 export interface IProductTypeDim {
-    productTypeId: number;
-    productCategory: string;
+    productTypeId?: number;
+    productCategory?: string;
     productSubCategory?: string | undefined;
-    productType: string;
-    addDate: Date;
-    updateDate: Date;
-    surveyFacts: SurveyFact[];
+    productType?: string;
+    internalAttrCategory?: string | undefined;
+    addDate?: Date;
+    deleteDate?: Date | undefined;
+    updateDate?: Date;
+    surveyFacts?: SurveyFact[];
 }
 
-export class BrandModelDim implements IBrandModelDim {
-    brandModelId!: number;
-    brand!: string;
-    model!: string;
-    addDate!: Date;
-    updateDate!: Date;
+export class ClubDim implements IClubDim {
+    clubId?: number;
+    brandId?: number | undefined;
+    manufacturer?: string;
+    model?: string;
 
-    constructor(data?: IBrandModelDim) {
+    constructor(data?: IClubDim) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -1552,86 +1567,35 @@ export class BrandModelDim implements IBrandModelDim {
 
     init(_data?: any) {
         if (_data) {
-            this.brandModelId = _data["brandModelId"];
-            this.brand = _data["brand"];
+            this.clubId = _data["clubId"];
+            this.brandId = _data["brandId"];
+            this.manufacturer = _data["manufacturer"];
             this.model = _data["model"];
-            this.addDate = _data["addDate"] ? new Date(_data["addDate"].toString()) : <any>undefined;
-            this.updateDate = _data["updateDate"] ? new Date(_data["updateDate"].toString()) : <any>undefined;
         }
     }
 
-    static fromJS(data: any): BrandModelDim {
+    static fromJS(data: any): ClubDim {
         data = typeof data === 'object' ? data : {};
-        let result = new BrandModelDim();
+        let result = new ClubDim();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["brandModelId"] = this.brandModelId;
-        data["brand"] = this.brand;
+        data["clubId"] = this.clubId;
+        data["brandId"] = this.brandId;
+        data["manufacturer"] = this.manufacturer;
         data["model"] = this.model;
-        data["addDate"] = this.addDate ? this.addDate.toISOString() : <any>undefined;
-        data["updateDate"] = this.updateDate ? this.updateDate.toISOString() : <any>undefined;
         return data;
     }
 }
 
-export interface IBrandModelDim {
-    brandModelId: number;
-    brand: string;
-    model: string;
-    addDate: Date;
-    updateDate: Date;
-}
-
-export class WeatherForecast implements IWeatherForecast {
-    date!: Date;
-    temperatureC!: number;
-    temperatureF!: number;
-    summary?: string | undefined;
-
-    constructor(data?: IWeatherForecast) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.date = _data["date"] ? new Date(_data["date"].toString()) : <any>undefined;
-            this.temperatureC = _data["temperatureC"];
-            this.temperatureF = _data["temperatureF"];
-            this.summary = _data["summary"];
-        }
-    }
-
-    static fromJS(data: any): WeatherForecast {
-        data = typeof data === 'object' ? data : {};
-        let result = new WeatherForecast();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["date"] = this.date ? this.date.toISOString() : <any>undefined;
-        data["temperatureC"] = this.temperatureC;
-        data["temperatureF"] = this.temperatureF;
-        data["summary"] = this.summary;
-        return data;
-    }
-}
-
-export interface IWeatherForecast {
-    date: Date;
-    temperatureC: number;
-    temperatureF: number;
-    summary?: string | undefined;
+export interface IClubDim {
+    clubId?: number;
+    brandId?: number | undefined;
+    manufacturer?: string;
+    model?: string;
 }
 
 export class ApiException extends Error {
@@ -1663,8 +1627,4 @@ function throwException(message: string, status: number, response: string, heade
         throw result;
     else
         throw new ApiException(message, status, response, headers, null);
-}
-
-function isAxiosError(obj: any | undefined): obj is AxiosError {
-    return obj && obj.isAxiosError === true;
 }

@@ -43,7 +43,7 @@ export class UserService {
         return this._auth0.getUser().pipe(
             tap((user) => {
                 this._user.next(user)
-                console.log(user)
+                // console.log(user)
             })
         )
     }

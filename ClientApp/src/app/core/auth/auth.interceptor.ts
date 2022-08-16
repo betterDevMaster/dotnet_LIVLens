@@ -30,6 +30,8 @@ export class AuthInterceptor implements HttpInterceptor {
         // Clone the request object
         let newReq = req.clone()
 
+        // console.log('auth intercepted', JSON.stringify(newReq))
+
         // Request
         //
         // If the access token didn't expire, add the Authorization header.

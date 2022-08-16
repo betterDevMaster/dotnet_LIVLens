@@ -18,21 +18,21 @@
         <div class="flex flex-col gt-xs:flex-row">
             <mat-table
                 class="lessons-table mat-elevation-z8"
-                [dataSource]="brndMgmtService.allBrands"
+                [dataSource]="allBrandsDataSource"
             >
                 <ng-container matColumnDef="brandId">
                     <mat-header-cell *matHeaderCellDef>#</mat-header-cell>
                     <mat-cell *matCellDef="let brand">{{
-                        brand.BRAND_ID
+                        brand.brandId
                     }}</mat-cell>
                 </ng-container>
 
-                <ng-container matColumnDef="name">
+                <ng-container matColumnDef="brand">
                     <mat-header-cell *matHeaderCellDef>Brand</mat-header-cell>
                     <mat-cell
                         class="description-cell"
                         *matCellDef="let brand"
-                        >{{ brand.BRAND }}</mat-cell
+                        >{{ brand.brand }}</mat-cell
                     >
                 </ng-container>
 
@@ -44,6 +44,12 @@
                     *matRowDef="let row; columns: displayedColumns"
                 ></mat-row>
             </mat-table>
+            <mat-paginator
+                #paginator
+                [pageSize]="10"
+                [pageSizeOptions]="[10, 25, 50]"
+                showFirstLastButtons
+            ></mat-paginator>
         </div>
     </div>
 </div>

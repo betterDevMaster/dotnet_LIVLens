@@ -1,1 +1,96 @@
-<p>player-management works!</p>
+<div class="flex-auto p-6 sm:p-10">
+    <div class="max-w-3xl" *ngIf="false">
+        <app-brand-form></app-brand-form>
+    </div>
+    <div class="flex mb-3">
+        <p class="text-3xl font-bold mr-auto">Player Management</p>
+        <button
+            mat-stroked-button
+            color="primary"
+            class="ml-auto mr-5"
+            (click)="openDialog()"
+        >
+            Add Player
+        </button>
+    </div>
+
+    <div class="max-w-none">
+        <div class="flex flex-col gt-xs:flex-row">
+            <mat-table
+                class="lessons-table mat-elevation-z8"
+                [dataSource]="allPlayersDataSource"
+            >
+                <ng-container matColumnDef="playerId">
+                    <mat-header-cell *matHeaderCellDef
+                        >Player ID</mat-header-cell
+                    >
+                    <mat-cell *matCellDef="let event">{{
+                        event.playerId
+                    }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="firstName">
+                    <mat-header-cell *matHeaderCellDef
+                        >First Name</mat-header-cell
+                    >
+                    <mat-cell *matCellDef="let event">{{
+                        event.firstName
+                    }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="lastName">
+                    <mat-header-cell *matHeaderCellDef
+                        >Last Name</mat-header-cell
+                    >
+                    <mat-cell *matCellDef="let event">{{
+                        event.lastName
+                    }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="dob">
+                    <mat-header-cell *matHeaderCellDef
+                        >Birthdate</mat-header-cell
+                    >
+                    <mat-cell *matCellDef="let event">{{ event.dob }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="countryName">
+                    <mat-header-cell *matHeaderCellDef>Country</mat-header-cell>
+                    <mat-cell *matCellDef="let event">{{
+                        event.countryName
+                    }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="countryCode">
+                    <mat-header-cell *matHeaderCellDef
+                        >Country Code</mat-header-cell
+                    >
+                    <mat-cell *matCellDef="let event">{{
+                        event.countryCode
+                    }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="amateur">
+                    <mat-header-cell *matHeaderCellDef>Amature</mat-header-cell>
+                    <mat-cell *matCellDef="let event">{{
+                        event.amateur > 0 ? 'Y' : 'N'
+                    }}</mat-cell>
+                </ng-container>
+
+                <mat-header-row
+                    *matHeaderRowDef="displayedColumns"
+                ></mat-header-row>
+
+                <mat-row
+                    *matRowDef="let row; columns: displayedColumns"
+                ></mat-row>
+            </mat-table>
+            <mat-paginator
+                #paginator
+                [pageSize]="10"
+                [pageSizeOptions]="[10, 25, 50]"
+                showFirstLastButtons
+            ></mat-paginator>
+        </div>
+    </div>
+</div>

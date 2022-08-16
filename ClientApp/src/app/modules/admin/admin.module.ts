@@ -26,6 +26,7 @@ import { BrandManagementComponent } from './brand-management/brand-management.co
 import { AdminSidebarComponent } from './admin-sidebar/admin-sidebar.component'
 import { adminRoutes } from './admin.routing'
 import { BrandFormComponent } from './brand-management/brand-form/brand-form.component'
+import { MatPaginatorModule } from '@angular/material/paginator'
 
 @NgModule({
     declarations: [
@@ -57,6 +58,7 @@ import { BrandFormComponent } from './brand-management/brand-form/brand-form.com
         FuseScrollResetModule,
         SharedModule,
         MatTableModule,
+        MatPaginatorModule,
     ],
 })
 export class AdminModule {}

@@ -1,1 +1,94 @@
-<p>event-management works!</p>
+<div class="flex-auto p-6 sm:p-10">
+    <div class="max-w-3xl" *ngIf="false">
+        <app-brand-form></app-brand-form>
+    </div>
+    <div class="flex mb-3">
+        <p class="text-3xl font-bold mr-auto">Event Management</p>
+        <button
+            mat-stroked-button
+            color="primary"
+            class="ml-auto mr-5"
+            (click)="openDialog()"
+        >
+            Add Club
+        </button>
+    </div>
+
+    <div class="max-w-5xl">
+        <div class="flex flex-col gt-xs:flex-row">
+            <mat-table
+                class="lessons-table mat-elevation-z8"
+                [dataSource]="allEventsDataSource"
+            >
+                <ng-container matColumnDef="eventName">
+                    <mat-header-cell *matHeaderCellDef
+                        >Event Name</mat-header-cell
+                    >
+                    <mat-cell *matCellDef="let event">{{
+                        event.eventName
+                    }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="city">
+                    <mat-header-cell *matHeaderCellDef>City</mat-header-cell>
+                    <mat-cell *matCellDef="let event">{{
+                        event.city
+                    }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="state">
+                    <mat-header-cell *matHeaderCellDef>State</mat-header-cell>
+                    <mat-cell *matCellDef="let event">{{
+                        event.state
+                    }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="country">
+                    <mat-header-cell *matHeaderCellDef>Country</mat-header-cell>
+                    <mat-cell *matCellDef="let event">{{
+                        event.country
+                    }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="courseName">
+                    <mat-header-cell *matHeaderCellDef
+                        >Course Name</mat-header-cell
+                    >
+                    <mat-cell *matCellDef="let event">{{
+                        event.courseName
+                    }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="eventDate">
+                    <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+                    <mat-cell *matCellDef="let event">{{
+                        event.eventDate | date: 'mediumDate'
+                    }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="coursePar">
+                    <mat-header-cell *matHeaderCellDef
+                        >Course Par</mat-header-cell
+                    >
+                    <mat-cell *matCellDef="let event">{{
+                        event.coursePar
+                    }}</mat-cell>
+                </ng-container>
+
+                <mat-header-row
+                    *matHeaderRowDef="displayedColumns"
+                ></mat-header-row>
+
+                <mat-row
+                    *matRowDef="let row; columns: displayedColumns"
+                ></mat-row>
+            </mat-table>
+            <mat-paginator
+                #paginator
+                [pageSize]="10"
+                [pageSizeOptions]="[10, 25, 50]"
+                showFirstLastButtons
+            ></mat-paginator>
+        </div>
+    </div>
+</div>
