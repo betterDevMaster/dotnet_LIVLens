@@ -48,6 +48,7 @@
 		<None Remove="ClientApp\dist\runtime.3ab7c7c911c1916a.js" />
 		<None Remove="ClientApp\dist\3rdpartylicenses.txt" />
 		<None Remove="ClientApp\dist\styles.eb8e17e88dc46d8c.css" />
+		<None Remove="ClientApp\dist\main.bf19e3f82f2893ff.js" />
 	</ItemGroup>
 	<ItemGroup>
 		<Folder Include="Services\" />

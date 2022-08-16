@@ -1,4 +1,7 @@
-﻿using LIVLens.Security;
+﻿using LIVLens.Interfaces;
+using LIVLens.Models;
+using LIVLens.Security;
+using LIVLens.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -40,6 +43,16 @@ builder.Services.AddSwaggerDocument(settings =>
 });
 
 builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
+builder.Services.AddScoped<LIVLensContext>();
+builder.Services.AddScoped<IRepository<BrandDim>, Repository<BrandDim>>();
+builder.Services.AddScoped<IRepository<BrandModelDim>, Repository<BrandModelDim>>();
+builder.Services.AddScoped<IRepository<ClubDim>, Repository<ClubDim>>();
+builder.Services.AddScoped<IRepository<EventDim>, Repository<EventDim>>();
+builder.Services.AddScoped<IRepository<EventPlayerDim>, Repository<EventPlayerDim>>();
+builder.Services.AddScoped<IRepository<PlayerDim>, Repository<PlayerDim>>();
+builder.Services.AddScoped<IRepository<ProductTypeDim>, Repository<ProductTypeDim>>();
+builder.Services.AddScoped<IRepository<SurveyFact>, Repository<SurveyFact>>();
+
 
 var app = builder.Build();
 

@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LIVLens.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     public class BrandsController : Controller
     {
