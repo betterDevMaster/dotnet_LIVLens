@@ -3,9 +3,7 @@ import { MatDialog } from '@angular/material/dialog'
 import { BrandFormComponent } from './brand-form/brand-form.component'
 import { BrandManagementService } from './brand-management.service'
 import { MatPaginator } from '@angular/material/paginator'
-import { cloneDeep } from 'lodash'
 import { MatTableDataSource } from '@angular/material/table'
-import BRAND_DIM from 'app/models/brand'
 import { BrandDim } from 'app/api/api.generated.clients'
 
 @Component({

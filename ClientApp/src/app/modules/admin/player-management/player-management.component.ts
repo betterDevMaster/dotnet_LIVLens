@@ -30,12 +30,16 @@ export class PlayerManagementComponent implements OnInit {
         public dialog: MatDialog
     ) {
         this.allPlayersDataSource.paginator = this.paginator
+
         this.playerMgmtService.allPlayers.subscribe((players) => {
             this.allPlayersDataSource.data = players
+            this.allPlayersDataSource.paginator = this.paginator
         })
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        this.allPlayersDataSource.paginator = this.paginator
+    }
 
     openDialog(): void {
         // const dialogRef = this.dialog.open(BrandFormComponent, {

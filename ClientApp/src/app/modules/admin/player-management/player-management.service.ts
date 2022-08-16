@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core'
+import { FuseLoadingService } from '@fuse/services/loading'
 import { LIVLensAPIClient, PlayerDim } from 'app/api/api.generated.clients'
 import { BehaviorSubject } from 'rxjs'
 
@@ -9,12 +10,14 @@ export class PlayerManagementService {
     public allPlayers = new BehaviorSubject<PlayerDim[]>([])
     private _apiService = new LIVLensAPIClient()
 
-    constructor() {
+    constructor(private _loadingService: FuseLoadingService) {
         this.getAllPlayers().then(() => console.log('players loaded'))
     }
 
     async getAllPlayers() {
+        this._loadingService.show()
         const players = await this._apiService.players_GetAll()
+        this._loadingService.hide()
 
         players.sort((a, b) => {
             const result = a.firstName.localeCompare(b.firstName)
@@ -23,8 +26,6 @@ export class PlayerManagementService {
         })
 
         this.allPlayers.next(players)
-
-        console.log(players)
 
         return players
     }
