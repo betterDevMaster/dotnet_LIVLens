@@ -1,0 +1,162 @@
+<mat-card class="m-3">
+    <mat-card-title>
+        <p class="text-3xl font-bold">Player Survey</p>
+    </mat-card-title>
+    <mat-card-content>
+        <div>
+            <form class="example-form flex justify-evenly flex-wrap">
+                <mat-form-field class="w-full md:w-1/3" appearance="fill">
+                    <mat-label>LIV Event</mat-label>
+                    <input
+                        type="text"
+                        placeholder="LIV Event"
+                        aria-label="LIV Event"
+                        matInput
+                        [formControl]="eventControl"
+                        [matAutocomplete]="eventAuto"
+                    />
+                    <mat-autocomplete
+                        #eventAuto="matAutocomplete"
+                        [displayWith]="eventDisplay"
+                    >
+                        <mat-option
+                            *ngFor="let event of eventOptions | async"
+                            [value]="event"
+                        >
+                            {{ event.eventName }}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+
+                <mat-form-field class="sm:w-full md:w-1/4" appearance="fill">
+                    <mat-label>Player</mat-label>
+                    <input
+                        type="text"
+                        placeholder="Player"
+                        aria-label="Player"
+                        matInput
+                        [formControl]="playerControl"
+                        [matAutocomplete]="playerAuto"
+                    />
+                    <mat-autocomplete
+                        #playerAuto="matAutocomplete"
+                        [displayWith]="playerDisplay"
+                    >
+                        <mat-option
+                            *ngFor="let player of playerOptions | async"
+                            [value]="player"
+                        >
+                            {{ player.firstName }} {{ player.lastName }}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+            </form>
+        </div>
+    </mat-card-content>
+</mat-card>
+<div class="m-3">
+    <mat-accordion class="example-headers-align">
+        <mat-expansion-panel
+            [expanded]="step === 0"
+            (opened)="setStep(0)"
+            hideToggle
+        >
+            <mat-expansion-panel-header>
+                <mat-panel-title> Player Clubs </mat-panel-title>
+                <mat-panel-description>
+                    Verify the clubs in the player's bag
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <mat-form-field class="w-full md:w-2/3" appearance="fill">
+                <mat-label>Add Club Observation</mat-label>
+                <input
+                    type="text"
+                    placeholder="Club"
+                    aria-label="Club"
+                    matInput
+                    [formControl]="brandModelControl"
+                    [matAutocomplete]="clubAuto"
+                />
+                <mat-autocomplete
+                    #clubAuto="matAutocomplete"
+                    [displayWith]="brandModelDisplay"
+                >
+                    <mat-option
+                        *ngFor="let bm of brandModelOptions | async"
+                        [value]="club"
+                    >
+                        {{ brandMap.get(bm.brandId).brand }} {{ bm.model }}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+            <mat-action-row>
+                <button mat-button color="primary" (click)="nextStep()">
+                    Next
+                </button>
+            </mat-action-row>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel
+            [expanded]="step === 1"
+            (opened)="setStep(1)"
+            hideToggle
+        >
+            <mat-expansion-panel-header>
+                <mat-panel-title> Equipment </mat-panel-title>
+                <mat-panel-description>
+                    Note the players equipment such as rangefinders
+                    <!-- <mat-icon>map</mat-icon> -->
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <mat-form-field appearance="fill">
+                <mat-label>Country</mat-label>
+                <input matInput />
+            </mat-form-field>
+
+            <mat-action-row>
+                <button mat-button color="warn" (click)="prevStep()">
+                    Previous
+                </button>
+                <button mat-button color="primary" (click)="nextStep()">
+                    Next
+                </button>
+            </mat-action-row>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel
+            [expanded]="step === 2"
+            (opened)="setStep(2)"
+            hideToggle
+        >
+            <mat-expansion-panel-header>
+                <mat-panel-title> Apparel </mat-panel-title>
+                <mat-panel-description>
+                    Collect brands, sponsor patches, etc
+                    <!-- <mat-icon>date_range</mat-icon> -->
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <mat-form-field appearance="fill">
+                <mat-label>Date</mat-label>
+                <input
+                    matInput
+                    [matDatepicker]="picker"
+                    (focus)="picker.open()"
+                    readonly
+                />
+            </mat-form-field>
+            <mat-datepicker #picker></mat-datepicker>
+
+            <mat-action-row>
+                <button mat-button color="warn" (click)="prevStep()">
+                    Previous
+                </button>
+                <button mat-button color="primary" (click)="nextStep()">
+                    End
+                </button>
+            </mat-action-row>
+        </mat-expansion-panel>
+    </mat-accordion>
+</div>

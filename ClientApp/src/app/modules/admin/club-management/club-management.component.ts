@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog'
 import { MatPaginator } from '@angular/material/paginator'
 import { MatTableDataSource } from '@angular/material/table'
 import { ClubDim } from 'app/api/api.generated.clients'
-import { ClubManagementService } from './club-management.service'
+import { EquipmentManagementService } from './equipment-management.service'
 
 @Component({
     selector: 'app-club-management',
@@ -18,7 +18,7 @@ export class ClubManagementComponent implements OnInit {
     allBrandsDataSource = new MatTableDataSource<ClubDim>([])
 
     constructor(
-        public clubMgmtService: ClubManagementService,
+        public clubMgmtService: EquipmentManagementService,
         public dialog: MatDialog
     ) {
         this.allBrandsDataSource.paginator = this.paginator

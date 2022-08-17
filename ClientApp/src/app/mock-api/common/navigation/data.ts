@@ -4,10 +4,10 @@ import { FuseNavigationItem } from '@fuse/components/navigation'
 const navigationItems: FuseNavigationItem[] = [
     {
         id: 'example',
-        title: 'Data Entry',
+        title: 'Player Survey',
         type: 'basic',
         icon: 'heroicons_outline:table',
-        link: '/collect',
+        link: '/player-survey',
     },
     {
         id: 'example',
