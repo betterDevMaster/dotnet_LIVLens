@@ -25,7 +25,7 @@ export class EventManagementService {
 
         this.allEvents.next(events)
 
-        console.log(events)
+        // console.log(events)
 
         return events
     }

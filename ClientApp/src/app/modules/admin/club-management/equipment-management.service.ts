@@ -18,6 +18,10 @@ export class EquipmentManagementService {
     public allBrandModels = new BehaviorSubject<BrandModelDim[]>([])
     public allProductTypes = new BehaviorSubject<ProductTypeDim[]>([])
 
+    public productTypeMap = new BehaviorSubject<Map<number, ProductTypeDim>>(
+        new Map()
+    )
+
     constructor(private _loadingService: FuseLoadingService) {
         this.getAllClubs().then()
         this.getAllBrandModels().then()
@@ -50,6 +54,12 @@ export class EquipmentManagementService {
         this._loadingService.hide()
 
         this.allProductTypes.next(productTypes)
+
+        const newMap = new Map<number, ProductTypeDim>()
+
+        productTypes.forEach((pt) => newMap.set(pt.productTypeId, pt))
+
+        this.productTypeMap.next(newMap)
 
         return productTypes
     }

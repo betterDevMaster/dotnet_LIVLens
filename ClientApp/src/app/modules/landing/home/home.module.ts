@@ -13,9 +13,18 @@ import { MatCardModule } from '@angular/material/card'
 import { MatExpansionModule } from '@angular/material/expansion'
 import { MatDatepickerModule } from '@angular/material/datepicker'
 import { MatNativeDateModule } from '@angular/material/core'
+import { SurveyFactDisplayComponent } from './survey-fact-display/survey-fact-display.component'
+import { MatSelectModule } from '@angular/material/select'
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { SurveyFactEditComponent } from './survey-fact-edit/survey-fact-edit.component'
 
 @NgModule({
-    declarations: [LandingHomeComponent, PlayerSurveyComponent],
+    declarations: [
+        LandingHomeComponent,
+        PlayerSurveyComponent,
+        SurveyFactDisplayComponent,
+        SurveyFactEditComponent,
+    ],
     imports: [
         RouterModule.forChild(landingHomeRoutes),
         MatButtonModule,
@@ -28,6 +37,8 @@ import { MatNativeDateModule } from '@angular/material/core'
         MatExpansionModule,
         MatDatepickerModule,
         MatNativeDateModule,
+        MatSelectModule,
+        MatSlideToggleModule,
     ],
     providers: [MatNativeDateModule],
 })

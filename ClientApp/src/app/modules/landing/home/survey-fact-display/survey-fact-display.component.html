@@ -1,0 +1,32 @@
+<table class="table-auto">
+    <thead>
+        <tr>
+            <th>Club</th>
+            <th>Brand</th>
+            <th>Model</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let driver of surveyFacts">
+            <td>
+                {{ productTypeMap.get(driver.productTypeId).productType }}
+            </td>
+            <td>
+                {{
+                    driver.brandModelId
+                        ? brandMap.get(
+                              brandModelMap.get(driver.brandModelId).brandId
+                          ).brand
+                        : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                }}
+            </td>
+            <td>
+                {{
+                    driver.brandModelId
+                        ? brandModelMap.get(driver.brandModelId).model
+                        : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                }}
+            </td>
+        </tr>
+    </tbody>
+</table>

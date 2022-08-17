@@ -1,0 +1,28 @@
+<div class="flex flex-wrap">
+    <div class="w-full">01</div>
+    <div class="w-full">02</div>
+    <div>
+        <mat-form-field class="w-full md:w-2/3" appearance="fill">
+            <mat-label>Model</mat-label>
+            <input
+                type="text"
+                placeholder="TaylorMade SIM 2 "
+                aria-label="Club"
+                matInput
+                [formControl]="brandModelControl"
+                [matAutocomplete]="clubAuto"
+            />
+            <mat-autocomplete
+                #clubAuto="matAutocomplete"
+                [displayWith]="brandModelDisplay"
+            >
+                <mat-option
+                    *ngFor="let bm of brandModelOptions | async"
+                    [value]="bm"
+                >
+                    {{ brandMap.get(bm.brandId).brand }} {{ bm.model }}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+    </div>
+</div>
